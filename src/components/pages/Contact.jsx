@@ -1,5 +1,5 @@
-function Company() {
-  return <h1>Company</h1>;
+function Contact() {
+  return <h1>Contact</h1>;
 }
 
-export default Company;
+export default Contact;
