@@ -20,7 +20,9 @@ function NewProject() {
     })
       .then((response) => response.json())
       .then((data) => {
-        Navigate("/projects", { message: "Projeto criado com sucesso!" });
+        Navigate("/projects", {
+          state: { message: "Projeto cadastrado com sucesso!" },
+        });
       });
   }
 

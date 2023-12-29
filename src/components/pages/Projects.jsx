@@ -1,5 +1,61 @@
+import { useEffect, useState } from "react";
+
+import { useLocation } from "react-router-dom";
+import { FaPlus } from "react-icons/fa";
+
+import Message from "../layout/Message";
+
+import styles from "./Projects.module.css";
+import Container from "../layout/Container";
+import LinkButton from "../layout/LinkButton";
+import ProjectCard from "../project/ProjectCard";
+
 function Projects() {
-  return <h1>Projects</h1>;
+  const [projects, setProjects] = useState([]);
+
+  useEffect(() => {
+    fetch("http://localhost:5000/projects", {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+      },
+    })
+      .then((response) => response.json())
+      .then((data) => {
+        setProjects(data);
+      });
+  }, []);
+
+  const location = useLocation();
+  let message = "";
+
+  if (location.state) {
+    message = location.state.message;
+  }
+
+  return (
+    <div className={styles.project_container}>
+      <div className={styles.title_container}>
+        <h1>Meus Projects</h1>
+        <LinkButton to="/newproject" text={<FaPlus />} />
+      </div>
+      {message && <Message text={message} type="success" />}
+      <Container customClass="start">
+        {projects.length > 0 &&
+          projects.map((project) => {
+            return (
+              <ProjectCard
+                id={project.id}
+                name={project.name}
+                budget={project.budget}
+                category={project.category.name}
+                key={project.id}
+              />
+            );
+          })}
+      </Container>
+    </div>
+  );
 }
 
 export default Projects;
