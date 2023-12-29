@@ -14,6 +14,7 @@ import ProjectCard from "../project/ProjectCard";
 function Projects() {
   const [projects, setProjects] = useState([]);
   const [removeLoadind, setremoveLoadind] = useState(false);
+  const [projectMessage, setProjectMessage] = useState("");
 
   useEffect(() => {
     setTimeout(() => {
@@ -31,6 +32,20 @@ function Projects() {
     }, 1000);
   }, []);
 
+  function removeProject(id) {
+    fetch(`http://localhost:5000/projects/${id}`, {
+      method: "DELETE",
+      headers: {
+        "Content-Type": "application/json",
+      },
+    })
+      .then((response) => response.json())
+      .then((data) => {
+        setProjects(projects.filter((project) => project.id != id));
+        setProjectMessage("Projeto removido com sucesso!");
+      });
+  }
+
   const location = useLocation();
   let message = "";
 
@@ -45,6 +60,7 @@ function Projects() {
         <LinkButton to="/newproject" text={<FaPlus />} />
       </div>
       {message && <Message text={message} type="success" />}
+      {projectMessage && <Message text={projectMessage} type="success" />}
       <Container customClass="start">
         {projects.length > 0 &&
           projects.map((project) => {
@@ -55,6 +71,7 @@ function Projects() {
                 budget={project.budget}
                 category={project.category.name}
                 key={project.id}
+                handleRemove={removeProject}
               />
             );
           })}
