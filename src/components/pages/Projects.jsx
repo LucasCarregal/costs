@@ -7,23 +7,28 @@ import Message from "../layout/Message";
 
 import styles from "./Projects.module.css";
 import Container from "../layout/Container";
+import Loading from "../layout/Loading";
 import LinkButton from "../layout/LinkButton";
 import ProjectCard from "../project/ProjectCard";
 
 function Projects() {
   const [projects, setProjects] = useState([]);
+  const [removeLoadind, setremoveLoadind] = useState(false);
 
   useEffect(() => {
-    fetch("http://localhost:5000/projects", {
-      method: "GET",
-      headers: {
-        "Content-Type": "application/json",
-      },
-    })
-      .then((response) => response.json())
-      .then((data) => {
-        setProjects(data);
-      });
+    setTimeout(() => {
+      fetch("http://localhost:5000/projects", {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+        },
+      })
+        .then((response) => response.json())
+        .then((data) => {
+          setProjects(data);
+          setremoveLoadind(true);
+        });
+    }, 1000);
   }, []);
 
   const location = useLocation();
@@ -53,6 +58,10 @@ function Projects() {
               />
             );
           })}
+        {!removeLoadind && <Loading />}
+        {removeLoadind && projects.length === 0 && (
+          <Message text="Nenhum projeto encontrado" type="empty" />
+        )}
       </Container>
     </div>
   );

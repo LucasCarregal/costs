@@ -13,6 +13,8 @@ function Message({ type, text }) {
 
     setVisible(true);
 
+    if (type === "empty") return;
+
     const timer = setTimeout(() => {
       setVisible(false);
     }, 3000);
