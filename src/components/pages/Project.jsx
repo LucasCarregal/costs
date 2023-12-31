@@ -8,11 +8,13 @@ import Container from "../layout/Container";
 import ProjectForm from "../project/ProjectForm";
 import Message from "../layout/Message";
 import ServiceForm from "../services/ServiceForm";
+import ServiceCard from "../services/ServiceCard";
 
 function Project() {
   const { id } = useParams();
 
   const [project, setProject] = useState({});
+  const [services, setServices] = useState({});
   const [showProjectForm, setShowProjectForm] = useState(false);
   const [showServiceForm, setShowServiceForm] = useState(false);
   const [message, setMessage] = useState();
@@ -29,6 +31,7 @@ function Project() {
         .then((response) => response.json())
         .then((data) => {
           setProject(data);
+          setServices(data.services);
         });
     }, 1000);
   }, [id]);
@@ -98,6 +101,32 @@ function Project() {
       });
   }
 
+  function removeService(id, cost) {
+    const serviceUpdated = project.services.filter(
+      (service) => service.id != id
+    );
+
+    const projectUpdated = project;
+
+    projectUpdated.services = serviceUpdated;
+    projectUpdated.cost = parseFloat(projectUpdated.cost) - parseFloat(cost);
+
+    fetch(`http://localhost:5000/projects/${projectUpdated.id}`, {
+      method: "PATCH",
+      headers: {
+        "Content-type": "application/json",
+      },
+      body: JSON.stringify(projectUpdated),
+    })
+      .then((response) => response.json())
+      .then((data) => {
+        setProject(projectUpdated);
+        setServices(serviceUpdated);
+        setMessage("Servico removido!");
+        setType("success");
+      });
+  }
+
   function toogleShowProjectForm() {
     setShowProjectForm(!showProjectForm);
   }
@@ -156,7 +185,20 @@ function Project() {
             </div>
             <h2>Serviços</h2>
             <Container customClass="start">
-              <p>Itens do servico</p>
+              {project.services.length > 0 &&
+                services.map((service) => (
+                  <ServiceCard
+                    id={service.id}
+                    name={service.name}
+                    cost={service.cost}
+                    description={service.description}
+                    key={service.id}
+                    handleRemove={removeService}
+                  />
+                ))}
+              {project.services.length == 0 && (
+                <p>Nao ha servicos cadastrados nesse projeto!</p>
+              )}
             </Container>
           </Container>
         </div>
