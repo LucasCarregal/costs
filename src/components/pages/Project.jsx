@@ -1,11 +1,13 @@
-import { useParams } from "react-router-dom";
 import { useState, useEffect } from "react";
+import { useParams } from "react-router-dom";
+import { parse, v4 as uuidv4 } from "uuid";
 
 import styles from "./Project.module.css";
 import Loading from "../layout/Loading";
 import Container from "../layout/Container";
 import ProjectForm from "../project/ProjectForm";
 import Message from "../layout/Message";
+import ServiceForm from "../services/ServiceForm";
 
 function Project() {
   const { id } = useParams();
@@ -57,6 +59,45 @@ function Project() {
       });
   }
 
+  function createService(service) {
+    setMessage("");
+
+    // last service
+    const lastService = project.services[project.services.length - 1];
+
+    lastService.id = uuidv4();
+
+    const lastServiceCost = lastService.cost;
+
+    const newCost = parseFloat(project.cost) + parseFloat(lastServiceCost);
+
+    // maximum cost validation
+    if (newCost > project.budget) {
+      setMessage("Orcamento ultrapassado! Verifique o custo do servico.");
+      setType("error");
+      project.services.pop();
+      return;
+    }
+
+    // update project cost
+    project.cost = newCost;
+
+    fetch(`http://localhost:5000/projects/${project.id}`, {
+      method: "PATCH",
+      headers: {
+        "Content-type": "application/json",
+      },
+      body: JSON.stringify(project),
+    })
+      .then((response) => response.json())
+      .then((data) => {
+        setProject(data);
+        setShowServiceForm(false);
+        setMessage("Servico adicionado!");
+        setType("success");
+      });
+  }
+
   function toogleShowProjectForm() {
     setShowProjectForm(!showProjectForm);
   }
@@ -104,7 +145,13 @@ function Project() {
                 {showServiceForm ? "Fechar" : "Adicionar Serviço"}
               </button>
               <div className={styles.form}>
-                {showServiceForm && <p>form</p>}
+                {showServiceForm && (
+                  <ServiceForm
+                    handleSubmit={createService}
+                    textBtn="Adicionar Servico"
+                    projectData={project}
+                  />
+                )}
               </div>
             </div>
             <h2>Serviços</h2>
